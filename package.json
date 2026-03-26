@@ -1,0 +1,8 @@
+{
+  "name": "calculator",
+  "version": "1.0.0",
+  "description": "Web-based calculator app",
+  "scripts": {
+    "test": "node --test"
+  }
+}
