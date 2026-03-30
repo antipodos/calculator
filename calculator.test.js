@@ -8,6 +8,8 @@ class Calculator {
     this.previousValue = null;
     this.operator = null;
     this.waitingForOperand = false;
+    this.lastOperator = null;
+    this.lastOperand = null;
   }
 
   clear() {
@@ -15,6 +17,8 @@ class Calculator {
     this.previousValue = null;
     this.operator = null;
     this.waitingForOperand = false;
+    this.lastOperator = null;
+    this.lastOperand = null;
   }
 
   inputDigit(digit) {
@@ -88,17 +92,29 @@ class Calculator {
   }
 
   equals() {
-    if (!this.operator || this.waitingForOperand) return;
-    const result = this.calculate(
-      this.previousValue,
-      this.currentValue,
-      this.operator
-    );
-    this.currentValue =
-      result === "Error" ? "Error" : String(this.roundResult(result));
-    this.previousValue = null;
-    this.operator = null;
-    this.waitingForOperand = true;
+    if (this.operator && !this.waitingForOperand) {
+      this.lastOperator = this.operator;
+      this.lastOperand = this.currentValue;
+      const result = this.calculate(
+        this.previousValue,
+        this.currentValue,
+        this.operator
+      );
+      this.currentValue =
+        result === "Error" ? "Error" : String(this.roundResult(result));
+      this.previousValue = null;
+      this.operator = null;
+      this.waitingForOperand = true;
+    } else if (!this.operator && this.lastOperator !== null) {
+      const result = this.calculate(
+        this.currentValue,
+        this.lastOperand,
+        this.lastOperator
+      );
+      this.currentValue =
+        result === "Error" ? "Error" : String(this.roundResult(result));
+      this.waitingForOperand = true;
+    }
   }
 
   roundResult(value) {
@@ -217,4 +233,43 @@ test("floating point result is rounded correctly: 0.1 + 0.2 = 0.3", () => {
   calc.inputDigit("2");
   calc.equals();
   assert.equal(calc.currentValue, "0.3");
+});
+
+test("repeated equals repeats the last operation: 5 + 3 = 8, = 11, = 14", () => {
+  const calc = new Calculator();
+  calc.inputDigit("5");
+  calc.handleOperator("+");
+  calc.inputDigit("3");
+  calc.equals();
+  assert.equal(calc.currentValue, "8");
+  calc.equals();
+  assert.equal(calc.currentValue, "11");
+  calc.equals();
+  assert.equal(calc.currentValue, "14");
+});
+
+test("repeated equals works with multiplication: 2 * 3 = 6, = 18, = 54", () => {
+  const calc = new Calculator();
+  calc.inputDigit("2");
+  calc.handleOperator("*");
+  calc.inputDigit("3");
+  calc.equals();
+  assert.equal(calc.currentValue, "6");
+  calc.equals();
+  assert.equal(calc.currentValue, "18");
+  calc.equals();
+  assert.equal(calc.currentValue, "54");
+});
+
+test("clear resets repeated-equals state", () => {
+  const calc = new Calculator();
+  calc.inputDigit("5");
+  calc.handleOperator("+");
+  calc.inputDigit("3");
+  calc.equals();
+  calc.clear();
+  assert.equal(calc.lastOperator, null);
+  assert.equal(calc.lastOperand, null);
+  calc.equals();
+  assert.equal(calc.currentValue, "0");
 });
