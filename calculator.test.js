@@ -54,6 +54,22 @@ class Calculator {
     this.currentValue = String(value / 100);
   }
 
+  square() {
+    const value = parseFloat(this.currentValue);
+    this.currentValue = String(this.roundResult(value * value));
+    this.waitingForOperand = true;
+  }
+
+  squareRoot() {
+    const value = parseFloat(this.currentValue);
+    if (value < 0) {
+      this.currentValue = "Error";
+    } else {
+      this.currentValue = String(this.roundResult(Math.sqrt(value)));
+    }
+    this.waitingForOperand = true;
+  }
+
   calculate(a, b, op) {
     const numA = parseFloat(a);
     const numB = parseFloat(b);
@@ -271,5 +287,54 @@ test("clear resets repeated-equals state", () => {
   assert.equal(calc.lastOperator, null);
   assert.equal(calc.lastOperand, null);
   calc.equals();
+  assert.equal(calc.currentValue, "0");
+});
+
+test("square: 5² = 25", () => {
+  const calc = new Calculator();
+  calc.inputDigit("5");
+  calc.square();
+  assert.equal(calc.currentValue, "25");
+});
+
+test("square: -3² = 9", () => {
+  const calc = new Calculator();
+  calc.inputDigit("3");
+  calc.toggleSign();
+  calc.square();
+  assert.equal(calc.currentValue, "9");
+});
+
+test("square: 0² = 0", () => {
+  const calc = new Calculator();
+  calc.square();
+  assert.equal(calc.currentValue, "0");
+});
+
+test("squareRoot: √9 = 3", () => {
+  const calc = new Calculator();
+  calc.inputDigit("9");
+  calc.squareRoot();
+  assert.equal(calc.currentValue, "3");
+});
+
+test("squareRoot: √2 is rounded correctly", () => {
+  const calc = new Calculator();
+  calc.inputDigit("2");
+  calc.squareRoot();
+  assert.equal(calc.currentValue, String(Math.round(Math.sqrt(2) * 1e10) / 1e10));
+});
+
+test("squareRoot of negative number returns Error", () => {
+  const calc = new Calculator();
+  calc.inputDigit("4");
+  calc.toggleSign();
+  calc.squareRoot();
+  assert.equal(calc.currentValue, "Error");
+});
+
+test("squareRoot: √0 = 0", () => {
+  const calc = new Calculator();
+  calc.squareRoot();
   assert.equal(calc.currentValue, "0");
 });

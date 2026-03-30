@@ -50,6 +50,22 @@ class Calculator {
     this.currentValue = String(value / 100);
   }
 
+  square() {
+    const value = parseFloat(this.currentValue);
+    this.currentValue = String(this.roundResult(value * value));
+    this.waitingForOperand = true;
+  }
+
+  squareRoot() {
+    const value = parseFloat(this.currentValue);
+    if (value < 0) {
+      this.currentValue = "Error";
+    } else {
+      this.currentValue = String(this.roundResult(Math.sqrt(value)));
+    }
+    this.waitingForOperand = true;
+  }
+
   calculate(a, b, op) {
     const numA = parseFloat(a);
     const numB = parseFloat(b);
@@ -166,6 +182,10 @@ document.querySelectorAll(".btn").forEach((btn) => {
       calculator.toggleSign();
     } else if (action === "percent") {
       calculator.inputPercent();
+    } else if (action === "square") {
+      calculator.square();
+    } else if (action === "sqrt") {
+      calculator.squareRoot();
     }
 
     updateDisplay();
