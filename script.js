@@ -4,6 +4,8 @@ class Calculator {
     this.previousValue = null;
     this.operator = null;
     this.waitingForOperand = false;
+    this.lastOperator = null;
+    this.lastOperand = null;
   }
 
   clear() {
@@ -11,6 +13,8 @@ class Calculator {
     this.previousValue = null;
     this.operator = null;
     this.waitingForOperand = false;
+    this.lastOperator = null;
+    this.lastOperand = null;
   }
 
   inputDigit(digit) {
@@ -84,17 +88,29 @@ class Calculator {
   }
 
   equals() {
-    if (!this.operator || this.waitingForOperand) return;
-    const result = this.calculate(
-      this.previousValue,
-      this.currentValue,
-      this.operator
-    );
-    this.currentValue =
-      result === "Error" ? "Error" : String(this.roundResult(result));
-    this.previousValue = null;
-    this.operator = null;
-    this.waitingForOperand = true;
+    if (this.operator && !this.waitingForOperand) {
+      this.lastOperator = this.operator;
+      this.lastOperand = this.currentValue;
+      const result = this.calculate(
+        this.previousValue,
+        this.currentValue,
+        this.operator
+      );
+      this.currentValue =
+        result === "Error" ? "Error" : String(this.roundResult(result));
+      this.previousValue = null;
+      this.operator = null;
+      this.waitingForOperand = true;
+    } else if (!this.operator && this.lastOperator !== null) {
+      const result = this.calculate(
+        this.currentValue,
+        this.lastOperand,
+        this.lastOperator
+      );
+      this.currentValue =
+        result === "Error" ? "Error" : String(this.roundResult(result));
+      this.waitingForOperand = true;
+    }
   }
 
   roundResult(value) {
